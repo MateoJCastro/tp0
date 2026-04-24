@@ -7,6 +7,26 @@ int main(void) {
 	log_info(logger, "Servidor listo para recibir al cliente");
 	int cliente_fd = esperar_cliente(server_fd);
 
+		// --- INICIO DEL HANDSHAKE ---
+	size_t bytes;
+	int32_t handshake;
+	int32_t resultOk = 0;
+	int32_t resultError = -1;
+
+		// Nos quedamos esperando a que el cliente nos mande su código de presentación
+	bytes = recv(socket_cliente, &handshake, sizeof(int32_t), MSG_WAITALL);
+
+	if (handshake == 1) {
+    	// Si nos mandó un 1, le decimos que todo OK (0)
+    	bytes = send(socket_cliente, &resultOk, sizeof(int32_t), 0);
+    	log_info(logger, "Handshake con cliente exitoso!"); // Opcional si tenés logger acá
+	} else {
+    	// Si nos mandó cualquier otra cosa, le cortamos el rostro (-1)
+    	bytes = send(socket_cliente, &resultError, sizeof(int32_t), 0);
+    	log_warning(logger, "Handshake fallido!");
+	}
+	// --- FIN DEL HANDSHAKE ---
+
 	t_list* lista;
 	while (1) {
 		int cod_op = recibir_operacion(cliente_fd);
