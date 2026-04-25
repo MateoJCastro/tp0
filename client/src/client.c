@@ -38,9 +38,6 @@ int main(void)
 	log_info(logger,"El valor de la clave es %s", valor);
 
 
-	/* ---------------- LEER DE CONSOLA ---------------- */
-
-	leer_consola(logger);
 
 	/*---------------------------------------------------PARTE 3-------------------------------------------------------------*/
 
@@ -57,6 +54,10 @@ int main(void)
 
 	// Mandamos nuestro "Hola" (el número 1)
 	bytes = send(conexion, &handshake, sizeof(int32_t), 0);
+	if (bytes <= 0) {
+    log_error(logger, "No se pudo enviar el handshake");
+    abort();
+	}
 
 	// Esperamos la respuesta del servidor
 	bytes = recv(conexion, &result, sizeof(int32_t), MSG_WAITALL);

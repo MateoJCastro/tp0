@@ -8,7 +8,7 @@ int iniciar_servidor(void)
 	int socket_servidor;
 	int err;
 
-	struct addrinfo hints, *servinfo, *p;
+	struct addrinfo hints, *servinfo;
 
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_INET;
@@ -16,16 +16,32 @@ int iniciar_servidor(void)
 	hints.ai_flags = AI_PASSIVE;
 
 	err = getaddrinfo(NULL, PUERTO, &hints, &servinfo);
+	if (err != 0) {
+    log_error(logger, "Error al preparar la IP y puerto");
+    abort();
+	}
 
 	socket_servidor = socket(servinfo->ai_family,
 							servinfo->ai_socktype,
 							servinfo->ai_protocol);
 							
 	err = setsockopt(socket_servidor, SOL_SOCKET, SO_REUSEPORT, &(int){1}, sizeof(int));
+	if (err == -1) {
+    log_error(logger, "Error en el bind (¿puerto en uso?)");
+    abort();
+	}
 
 	err = bind(socket_servidor, servinfo->ai_addr, servinfo->ai_addrlen);
+	if (err == -1) {
+    log_error(logger, "Error en el bind (¿puerto en uso?)");
+    abort();
+	}
 
 	err = listen(socket_servidor, SOMAXCONN);
+	if (err == -1) {
+    log_error(logger, "Error en el listen (¿puerto en uso?)");
+    abort();
+	}
 
 	freeaddrinfo(servinfo);
 	log_trace(logger, "Listo para escuchar a mi cliente");

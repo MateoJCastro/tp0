@@ -14,15 +14,19 @@ int main(void) {
 	int32_t resultError = -1;
 
 		// Nos quedamos esperando a que el cliente nos mande su código de presentación
-	bytes = recv(socket_cliente, &handshake, sizeof(int32_t), MSG_WAITALL);
+	bytes = recv(cliente_fd, &handshake, sizeof(int32_t), MSG_WAITALL);
+	if (bytes <= 0) {
+    	log_error(logger, "Error al recibir el handshake, o el cliente se desconectó");
+    	return EXIT_FAILURE; // Cortamos la ejecución de este cliente
+	}
 
 	if (handshake == 1) {
     	// Si nos mandó un 1, le decimos que todo OK (0)
-    	bytes = send(socket_cliente, &resultOk, sizeof(int32_t), 0);
+    	bytes = send(cliente_fd, &resultOk, sizeof(int32_t), 0);
     	log_info(logger, "Handshake con cliente exitoso!"); // Opcional si tenés logger acá
 	} else {
     	// Si nos mandó cualquier otra cosa, le cortamos el rostro (-1)
-    	bytes = send(socket_cliente, &resultError, sizeof(int32_t), 0);
+    	bytes = send(cliente_fd, &resultError, sizeof(int32_t), 0);
     	log_warning(logger, "Handshake fallido!");
 	}
 	// --- FIN DEL HANDSHAKE ---

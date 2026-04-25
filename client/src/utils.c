@@ -37,6 +37,12 @@ int crear_conexion(char *ip, char* puerto)
 
 	err = connect(socket_cliente, server_info->ai_addr, server_info->ai_addrlen);
 
+	if (err == -1) {
+    	printf("Error al conectar con el servidor\n");
+    	abort();
+	}
+	
+
 	freeaddrinfo(server_info);
 
 	return socket_cliente;
